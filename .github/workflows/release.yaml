@@ -35,57 +35,12 @@ jobs:
     steps:
     - uses: actions/checkout@v3
 
-    - id: apko
-      uses: chainguard-images/actions/apko-snapshot@main
+    - uses: hashicorp/setup-terraform@v2
       with:
-        config: apko.yaml
-        image_refs: apko.images
-        base-tag: ghcr.io/${{ github.repository }}
+        terraform_version: '1.3.*'
+        terraform_wrapper: false
 
-    - name: Emit Image Refs output
-      id: emit-refs
-      run: |
-        cat apko.images | sed 's/$/\n/g' | grep -v '^$' | jq -R -s -c 'split("\n")[:-1]' | jq .
-        echo "image-refs=$(cat apko.images | sed 's/$/\n/g' | grep -v '^$' | jq -R -s -c 'split("\n")[:-1]')" >> $GITHUB_OUTPUT
-
-  scan:
-    name: Scan images
-    needs: build
-    runs-on: ubuntu-latest
-
-    # https://docs.github.com/en/actions/reference/authentication-in-a-workflow
-    permissions:
-      id-token: write
-      packages: write
-      contents: read
-
-    strategy:
-      matrix:
-        ref: ${{ fromJson(needs.build.outputs.image-refs) }}
-    steps:
     - run: |
-        echo ${{ matrix.ref }}
-
-    - uses: chainguard-images/actions/vul-scans@main
-      id: scans
-      with:
-        registry: ghcr.io
-        image: ${{ matrix.ref }}
-        RUN_SNYK: "false"
-        RUN_GRYPE: "false"
-        DOCKER_LOGIN: 'true'
-
-    - name: Image Vulnerability scan output
-      shell: bash
-      env:
-        SNYK_COUNT: ${{ steps.scans.outputs.SNYK_COUNT }}
-        GRYPE_COUNT: ${{ steps.scans.outputs.GRYPE_COUNT }}
-        TRIVY_COUNT: ${{ steps.scans.outputs.TRIVY_COUNT }}
-      run: |
-        echo "Image Vulnerability scan output" >> $GITHUB_STEP_SUMMARY
-        echo "Image ID: ${{ matrix.ref }}" >> $GITHUB_STEP_SUMMARY
-        echo "" >> $GITHUB_STEP_SUMMARY
-        echo "Snyk Count: $SNYK_COUNT" >> $GITHUB_STEP_SUMMARY
-        echo "Grype Count: $GRYPE_COUNT" >> $GITHUB_STEP_SUMMARY
-        echo "Trivy Count: $TRIVY_COUNT" >> $GITHUB_STEP_SUMMARY
-
+        export TF_VAR_target_repository=ghcr.io/${{ github.repository }}
+        terraform init
+        terraform apply -auto-approve
