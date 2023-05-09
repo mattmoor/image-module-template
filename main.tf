@@ -26,7 +26,7 @@ provider "apko" {
 }
 
 module "image" {
-  source  = "github.com/chainguard-dev/terraform-publisher-apko//"
+  source  = "chainguard-dev/apko/publisher"
 
   target_repository = var.target_repository
   config = file("${path.module}/apko.yaml")
