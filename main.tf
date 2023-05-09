@@ -32,6 +32,8 @@ module "image" {
   config = file("${path.module}/apko.yaml")
 }
 
+# TODO(mattmoor): Tag the resulting image.
+
 output "image_ref" {
   value = module.image.image_ref
 }
