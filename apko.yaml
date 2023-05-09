@@ -1,0 +1,22 @@
+contents:
+  repositories:
+    - https://packages.wolfi.dev/os
+  packages:
+    - wolfi-baselayout
+    - ca-certificates
+    # TODO: Add packages here:
+    # - busybox # add a shell (or bash, etc.)
+    # - python3 # add a language runtime (or ruby-3.2, nodejs, etc.)
+    # - sqlite  # add a database (or postgres, mariadb, etc.)
+
+# Run the image as a non-root user by default.
+# If you need to run as a specific user, configure it here. 
+accounts:
+  groups:
+    - groupname: nonroot
+      gid: 65532
+  users:
+    - username: nonroot
+      uid: 65532
+      gid: 65532
+  run-as: 65532
