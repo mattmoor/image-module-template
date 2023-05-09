@@ -35,6 +35,12 @@ jobs:
     steps:
     - uses: actions/checkout@v3
 
+    - uses: docker/login-action@v1
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+
     - uses: hashicorp/setup-terraform@v2
       with:
         terraform_version: '1.3.*'
