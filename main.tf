@@ -5,11 +5,14 @@ SPDX-License-Identifier: Apache-2.0
 
 terraform {
   required_providers {
+    apko = {
+      source = "chainguard-dev/apko"
+    }
     cosign = {
       source = "chainguard-dev/cosign"
     }
-    apko = {
-      source = "chainguard-dev/apko"
+    oci = {
+      source = "chainguard-dev/oci"
     }
   }
 }
@@ -32,8 +35,11 @@ module "image" {
   config = file("${path.module}/apko.yaml")
 }
 
-# TODO(mattmoor): Tag the resulting image.
+resource "oci_tag" "latest" {
+  digest_ref = module.image.image_ref
+  tag        = "latest"
+}
 
 output "image_ref" {
-  value = module.image.image_ref
+  value = oci_tag.latest.tagged_ref
 }
